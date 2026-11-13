@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#050b1f">
+  <title>Secret Santa – Organisateur</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Icônes réutilisées -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3l2.4 5.6L20 9.3l-4.3 3.9 1.2 5.8L12 16.2 7.1 19l1.2-5.8L4 9.3l5.6-.7z"/></symbol>
+    <symbol id="i-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.5L16 9.5"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><path d="M12 17v.5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8"/></symbol>
+    <symbol id="i-sms" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></symbol>
+    <symbol id="i-redo" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></symbol>
+  </svg>
+
+  <main class="orga">
+    <header class="orga-head">
+      <p class="eyebrow">Secret Santa</p>
+      <h1>Espace organisateur</h1>
+      <p>Les résultats ne s'affichent jamais ici. Toi aussi, tu gardes la surprise.</p>
+    </header>
+
+    <!-- Étape 1 : participants -->
+    <section class="glass card" id="step1">
+      <h2 class="step-title"><span class="num">1</span>Les participants</h2>
+      <label for="names">Une ligne par participant. Un couple tient sur une seule ligne.</label>
+      <textarea id="names" rows="6">Mounette et Alain
+Laurent et Laure
+Estelle
+Béa et Fab
+Mandy et Jerem
+Soussou et Arthur</textarea>
+      <p class="counter" id="counter" aria-live="polite"></p>
+      <button class="btn btn-gold btn-big" id="drawBtn" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#i-star"/></svg>
+        Faire le tirage au sort
+      </button>
+    </section>
+
+    <!-- Étape 2 : liens à envoyer -->
+    <section id="step2" class="hidden" style="display:flex;flex-direction:column;gap:18px">
+      <div class="banner">
+        <svg class="icon" aria-hidden="true"><use href="#i-ok"/></svg>
+        <p><strong>Le tirage est fait !</strong> Envoie maintenant à chacun son propre lien.</p>
+      </div>
+      <div class="banner hidden" id="localWarn">
+        <svg class="icon" aria-hidden="true"><use href="#i-warn"/></svg>
+        <p>Tu ouvres cette page depuis ton ordinateur, pas depuis Internet. Les liens ne fonctionneront pour les autres qu'une fois le site mis en ligne.</p>
+      </div>
+      <h2 class="step-title"><span class="num">2</span>Envoyer les liens</h2>
+      <div class="people" id="list"></div>
+      <div class="redo-zone">
+        <p>Une erreur dans la liste ?</p>
+        <button class="btn btn-redo" id="redoBtn" type="button">
+          <svg class="icon" aria-hidden="true"><use href="#i-redo"/></svg>
+          Refaire un tirage
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Confirmation « Refaire un tirage » -->
+  <div class="overlay hidden" id="overlay">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle" aria-describedby="confirmText">
+      <svg class="icon warn" aria-hidden="true"><use href="#i-warn"/></svg>
+      <h2 id="confirmTitle">Refaire le tirage ?</h2>
+      <p id="confirmText">Le nouveau tirage remplace l'ancien. Les liens déjà envoyés ne seront plus bons : il faudra renvoyer les nouveaux à tout le monde.</p>
+      <div class="buttons">
+        <button class="btn btn-danger" id="confirmYes" type="button">Oui, refaire le tirage</button>
+        <button class="btn btn-outline" id="confirmNo" type="button">Non, garder ce tirage</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="santa.js"></script>
+  <script>
+    addDecor();
+    const STORE = "secretSanta.links";
+    const $ = (id) => document.getElementById(id);
+    const icon = (name) => `<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+
+    function baseUrl() {
+      // En local, on pointe vers index.html ; en ligne, le dossier suffit.
+      return new URL(location.protocol === "file:" ? "index.html" : "./", location.href).href;
+    }
+
+    function readNames() {
+      return $("names").value.split("\n").map((s) => s.trim()).filter(Boolean);
+    }
+
+    // Compteur en direct, remplacé par le message d'erreur s'il y a un souci
+    function checkNames() {
+      const names = readNames();
+      const unique = new Set(names.map((n) => n.toLowerCase()));
+      const c = $("counter");
+      let error = "";
+      if (names.length < 3) error = "Il faut au moins 3 participants.";
+      else if (unique.size !== names.length) error = "Un même nom apparaît deux fois, corrige la liste.";
+      c.classList.toggle("error", !!error);
+      c.innerHTML = error
+        ? icon("warn") + error
+        : icon("check") + names.length + " participants";
+      return error ? null : names;
+    }
+    $("names").addEventListener("input", checkNames);
+    checkNames();
+
+    function render(links) {
+      $("step1").classList.add("hidden");
+      $("step2").classList.remove("hidden");
+      $("localWarn").classList.toggle("hidden", location.protocol !== "file:");
+      const list = $("list");
+      list.innerHTML = "";
+      links.forEach(({ name, url }) => {
+        const plural = isPlural(name);
+        const msg = `🎅 Coucou ${name} ! Le tirage du Secret Santa a été fait. `
+          + (plural ? "Appuyez sur ce lien pour découvrir à qui vous offrez un cadeau : "
+                    : "Appuie sur ce lien pour découvrir à qui tu offres un cadeau : ")
+          + url;
+
+        const box = document.createElement("div");
+        box.className = "person";
+        box.innerHTML = `
+          <p class="label">Lien de</p>
+          <p class="who"></p>
+          <div class="actions">
+            <button class="btn btn-outline btn-copy" type="button">${icon("copy")}<span>Copier</span></button>
+            <a class="btn btn-gold wa" target="_blank" rel="noopener">WhatsApp</a>
+            <a class="btn btn-gold sms">${icon("sms")}SMS</a>
+          </div>`;
+        box.querySelector(".who").textContent = name;
+        box.querySelector(".wa").href = "https://wa.me/?text=" + encodeURIComponent(msg);
+        box.querySelector(".sms").href = "sms:?&body=" + encodeURIComponent(msg);
+        box.querySelector(".wa").setAttribute("aria-label", "Envoyer le lien de " + name + " par WhatsApp");
+        box.querySelector(".sms").setAttribute("aria-label", "Envoyer le lien de " + name + " par SMS");
+
+        const copyBtn = box.querySelector(".btn-copy");
+        copyBtn.setAttribute("aria-label", "Copier le message pour " + name);
+        let resetTimer;
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(msg);
+          } catch (e) {
+            const t = document.createElement("textarea");
+            t.value = msg; document.body.appendChild(t); t.select();
+            document.execCommand("copy"); t.remove();
+          }
+          copyBtn.classList.add("copied");
+          copyBtn.innerHTML = icon("check") + "<span>Copié !</span>";
+          clearTimeout(resetTimer);
+          resetTimer = setTimeout(() => {
+            copyBtn.classList.remove("copied");
+            copyBtn.innerHTML = icon("copy") + "<span>Copier</span>";
+          }, 2000);
+        });
+        list.appendChild(box);
+      });
+    }
+
+    $("drawBtn").addEventListener("click", () => {
+      const names = checkNames();
+      if (!names) return;
+      const base = baseUrl();
+      const links = drawCycle(names)
+        .map(({ giver, receiver }) => ({
+          name: giver,
+          url: base + "?c=" + encodeToken({ d: giver, r: receiver }),
+        }))
+        .sort((a, b) => names.indexOf(a.name) - names.indexOf(b.name)); // ordre de la liste, pas celui du tirage
+
+      try { localStorage.setItem(STORE, JSON.stringify(links)); } catch (e) {}
+      render(links);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Fenêtre de confirmation
+    let lastFocus = null;
+    function openConfirm() {
+      lastFocus = document.activeElement;
+      $("overlay").classList.remove("hidden");
+      $("confirmNo").focus();
+    }
+    function closeConfirm() {
+      $("overlay").classList.add("hidden");
+      if (lastFocus) lastFocus.focus();
+    }
+    $("redoBtn").addEventListener("click", openConfirm);
+    $("confirmNo").addEventListener("click", closeConfirm);
+    $("overlay").addEventListener("click", (e) => { if (e.target === $("overlay")) closeConfirm(); });
+    document.addEventListener("keydown", (e) => {
+      if ($("overlay").classList.contains("hidden")) return;
+      if (e.key === "Escape") closeConfirm();
+      if (e.key === "Tab") { // garder le focus dans la fenêtre
+        const a = $("confirmYes"), b = $("confirmNo");
+        if (e.shiftKey && document.activeElement === a) { e.preventDefault(); b.focus(); }
+        else if (!e.shiftKey && document.activeElement === b) { e.preventDefault(); a.focus(); }
+      }
+    });
+    $("confirmYes").addEventListener("click", () => {
+      try { localStorage.removeItem(STORE); } catch (e) {}
+      $("overlay").classList.add("hidden");
+      $("step2").classList.add("hidden");
+      $("step1").classList.remove("hidden");
+      checkNames();
+      window.scrollTo({ top: 0 });
+      $("drawBtn").focus();
+    });
+
+    // On retrouve le tirage déjà fait (sur cet appareil) pour ne pas le refaire par erreur.
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORE) || "null");
+      if (Array.isArray(saved) && saved.length) render(saved);
+    } catch (e) {}
+  </script>
+</body>
+</html>

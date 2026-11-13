@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#050b1f">
+  <title>Secret Santa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <!-- Lien valide -->
+    <section class="reveal-page hidden" id="ok">
+      <p class="eyebrow">Secret Santa</p>
+      <h1>Bonjour <span class="gold" id="giver"></span></h1>
+      <p class="intro" id="intro"></p>
+
+      <button class="stage" id="stage" type="button" aria-label="Ouvrir l'enveloppe">
+        <span class="halo" aria-hidden="true"></span>
+        <span class="env" aria-hidden="false">
+          <span class="env-float">
+            <span class="env-back" aria-hidden="true"></span>
+
+            <span class="flap" aria-hidden="true">
+              <svg width="300" height="120" viewBox="0 0 300 120">
+                <defs><linearGradient id="gFlap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ead9b3"/><stop offset="1" stop-color="#dcc597"/></linearGradient></defs>
+                <path d="M2 4 L150 118 L298 4 Z" fill="url(#gFlap)" stroke="#e8c069" stroke-width="2.5" stroke-linejoin="round"/>
+                <path d="M14 10 L150 112 L286 10" fill="none" stroke="#e8c069" stroke-width="1" opacity=".6"/>
+              </svg>
+            </span>
+
+            <span class="letter" aria-live="polite">
+              <span class="flourish" aria-hidden="true">✦ ✦ ✦</span>
+              <span class="to" id="youGive"></span>
+              <span class="name" id="receiver"></span>
+            </span>
+
+            <span class="pocket" aria-hidden="true">
+              <svg width="300" height="200" viewBox="0 0 300 200">
+                <defs><linearGradient id="gPaper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f4e9d0"/><stop offset="1" stop-color="#e3cfa4"/></linearGradient></defs>
+                <path d="M0 12 Q0 0 12 0 L150 96 L288 0 Q300 0 300 12 L300 188 Q300 200 288 200 L12 200 Q0 200 0 188 Z" fill="url(#gPaper)"/>
+                <path d="M0 200 L150 104 L300 200" fill="none" stroke="#cdb586" stroke-width="1.5"/>
+              </svg>
+            </span>
+
+            <span class="ring" aria-hidden="true"></span>
+
+            <span class="seal" aria-hidden="true">
+              <svg width="110" height="90" viewBox="0 0 110 90">
+                <path d="M18 30 C 4 22 6 6 22 8 C 22 18 30 22 36 28 Z" fill="#2f5d3a"/>
+                <path d="M92 30 C 106 22 104 6 88 8 C 88 18 80 22 74 28 Z" fill="#2f5d3a"/>
+                <circle cx="55" cy="46" r="36" fill="#7d1813"/>
+                <circle cx="55" cy="45" r="32" fill="#a3221c"/>
+                <circle cx="55" cy="45" r="24" fill="none" stroke="#6e1410" stroke-width="2" opacity=".6"/>
+                <circle cx="45" cy="34" r="8" fill="#d8473d" opacity=".55"/>
+                <text x="55" y="56" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="700" font-size="30" fill="#f6dc9a">S</text>
+              </svg>
+            </span>
+          </span>
+        </span>
+      </button>
+
+      <p class="hint" id="hint">
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="8" opacity=".5"/></svg>
+        <span id="tapText"></span>
+      </p>
+
+      <div class="after" id="after">
+        <p class="secret">Chut… c'est un secret !</p>
+        <p class="come-back" id="comeBack"></p>
+        <button class="btn btn-replay" id="replay" type="button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+          Revoir l'ouverture
+        </button>
+      </div>
+    </section>
+
+    <!-- Lien absent ou abîmé -->
+    <section class="error-wrap hidden" id="bad">
+      <div class="glass error-card">
+        <svg width="140" height="100" viewBox="0 0 140 100" aria-hidden="true">
+          <rect x="10" y="12" width="120" height="80" rx="8" fill="none" stroke="#e8c069" stroke-width="2.5"/>
+          <path d="M12 16 L70 58 L128 16" fill="none" stroke="#e8c069" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="8 6"/>
+          <g stroke="#f7efdf" stroke-width="2" stroke-linecap="round" transform="translate(112 18)"><path d="M0 -12 V12 M-10 -6 L10 6 M-10 6 L10 -6"/></g>
+        </svg>
+        <p class="eyebrow">Secret Santa</p>
+        <h1>Oups !</h1>
+        <p class="lead">Ce lien ne semble pas complet.</p>
+        <p class="sub">Demande à l'organisateur de te renvoyer ton lien.</p>
+        <div class="tip">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><path d="M12 7.5v.5"/></svg>
+          <p>Ensuite, appuie directement sur le lien dans ton message, sans le recopier.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="santa.js"></script>
+  <script>
+    addDecor();
+
+    const $ = (id) => document.getElementById(id);
+    const token = new URLSearchParams(location.search).get("c");
+    const data = token ? decodeToken(token) : null;
+
+    if (!data) {
+      $("bad").classList.remove("hidden");
+    } else {
+      const plural = isPlural(data.d);
+      const T = plural ? {
+        intro: "Le tirage au sort a eu lieu. Une lettre vous attend…",
+        tap: "Appuyez sur l'enveloppe pour l'ouvrir",
+        give: "Vous offrez un cadeau à",
+        back: "Vous pouvez revenir sur ce lien quand vous voulez.",
+      } : {
+        intro: "Le tirage au sort a eu lieu. Une lettre t'attend…",
+        tap: "Appuie sur l'enveloppe pour l'ouvrir",
+        give: "Tu offres un cadeau à",
+        back: "Tu peux revenir sur ce lien quand tu veux.",
+      };
+      $("giver").textContent = data.d;
+      $("intro").textContent = T.intro;
+      $("tapText").textContent = T.tap;
+      $("youGive").textContent = T.give;
+      $("comeBack").textContent = T.back;
+      if (data.r.length > 22) $("receiver").classList.add("long");
+      $("ok").classList.remove("hidden");
+
+      const page = $("ok");
+      const stage = $("stage");
+      const after = $("after");
+      const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      // Mode ralenti pour vérifier l'animation : ajouter &lent=1 au lien
+      const SLOW = new URLSearchParams(location.search).has("lent") ? 4 : 1;
+      function slowDown() {
+        if (SLOW === 1) return;
+        const t0 = Date.now();
+        const timer = setInterval(() => {
+          document.getAnimations().forEach((a) => {
+            if (!/fall|twinkle|float/.test(a.animationName || "")) a.playbackRate = 1 / SLOW;
+          });
+          if (Date.now() - t0 > 12000) clearInterval(timer);
+        }, 16);
+      }
+
+      // Chaque étape est déclenchée par une classe ajoutée au bon moment.
+      // (Pas de transition-delay en CSS : cela provoque un bug d'affichage dans Chrome,
+      // la lettre disparaissait pendant l'ouverture.)
+      let opened = false;
+      let timers = [];
+      const later = (fn, ms) => timers.push(setTimeout(fn, ms * SLOW));
+
+      function showAfter() {
+        after.classList.add("visible");
+        requestAnimationFrame(() => requestAnimationFrame(() => after.classList.add("show")));
+      }
+
+      function openEnvelope() {
+        if (opened) return;
+        opened = true;
+        stage.setAttribute("aria-label", "Enveloppe ouverte");
+        $("receiver").textContent = data.r; // le nom n'est écrit qu'à l'ouverture (annoncé aux lecteurs d'écran)
+
+        if (calm) {
+          // Version calme : simple fondu vers l'état final
+          page.style.transition = "opacity .2s";
+          page.style.opacity = "0";
+          setTimeout(() => {
+            page.classList.add("no-anim", "is-open", "flap-open", "flap-back", "rise");
+            showAfter();
+            void page.offsetHeight;
+            page.classList.remove("no-anim");
+            page.style.opacity = "1";
+          }, 200);
+          return;
+        }
+
+        page.classList.add("is-open");      // 0,0 s : le cachet saute, la page se réorganise
+        slowDown();
+        later(() => page.classList.add("flap-open"), 300);  // 0,3 s : le rabat bascule
+        later(() => page.classList.add("flap-back"), 600);  // 0,6 s : il passe derrière la lettre
+        later(() => page.classList.add("rise"), 700);       // 0,7 s : la lettre monte
+        later(sparkle, 1300);                               // 1,3 s : étincelles
+        later(showAfter, 1700);                             // 1,7 s : « Chut… »
+      }
+      stage.addEventListener("click", openEnvelope);
+
+      $("replay").addEventListener("click", () => {
+        timers.forEach(clearTimeout);
+        timers = [];
+        page.classList.add("no-anim");
+        page.classList.remove("is-open", "flap-open", "flap-back", "rise");
+        after.classList.remove("show", "visible");
+        void page.offsetHeight; // applique l'état fermé sans animation
+        page.classList.remove("no-anim");
+        opened = false;
+        stage.setAttribute("aria-label", "Ouvrir l'enveloppe");
+        window.scrollTo({ top: 0, behavior: calm ? "auto" : "smooth" });
+        setTimeout(openEnvelope, 600);
+      });
+
+      function sparkle() {
+        for (let i = 0; i < 22; i++) {
+          const s = document.createElement("span");
+          s.className = "spark";
+          s.setAttribute("aria-hidden", "true");
+          s.textContent = Math.random() < 0.6 ? "✦" : "•";
+          const angle = Math.PI + Math.random() * Math.PI; // en éventail vers le haut
+          const dist = 80 + Math.random() * 110;
+          s.style.setProperty("--dx", Math.cos(angle) * dist * 1.3 + "px");
+          s.style.setProperty("--dy", Math.sin(angle) * dist * 0.8 + 40 + "px");
+          s.style.top = "40px";
+          s.style.fontSize = 10 + Math.random() * 14 + "px";
+          s.style.animationDelay = Math.random() * 0.2 + "s";
+          stage.appendChild(s);
+          setTimeout(() => s.remove(), 1600 * SLOW);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
