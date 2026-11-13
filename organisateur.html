@@ -145,14 +145,14 @@ Soussou et Arthur</textarea>
         box.querySelector(".sms").setAttribute("aria-label", "Envoyer le lien de " + name + " par SMS");
 
         const copyBtn = box.querySelector(".btn-copy");
-        copyBtn.setAttribute("aria-label", "Copier le message pour " + name);
+        copyBtn.setAttribute("aria-label", "Copier le lien de " + name);
         let resetTimer;
         copyBtn.addEventListener("click", async () => {
           try {
-            await navigator.clipboard.writeText(msg);
+            await navigator.clipboard.writeText(url);
           } catch (e) {
             const t = document.createElement("textarea");
-            t.value = msg; document.body.appendChild(t); t.select();
+            t.value = url; document.body.appendChild(t); t.select();
             document.execCommand("copy"); t.remove();
           }
           copyBtn.classList.add("copied");
